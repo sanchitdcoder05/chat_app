@@ -33,21 +33,21 @@ fun WelcomeScreen(navHostController: NavHostController) {
     val welcomeOffsets = welcomeText.mapIndexed { index, _ ->
         slideInAnimation.animateDp(
             label = "Welcome Letter $index",
-            transitionSpec = { tween(durationMillis = 500, easing = FastOutSlowInEasing) } // Faster animation
+            transitionSpec = { tween(durationMillis = 500, easing = FastOutSlowInEasing) }
         ) { state -> if (state) 0.dp else if (index % 2 == 0) -200.dp else 200.dp }
     }
 
     val toOffsets = toText.mapIndexed { index, _ ->
         slideInAnimation.animateDp(
             label = "To Letter $index",
-            transitionSpec = { tween(durationMillis = 500, easing = FastOutSlowInEasing) } // Faster animation
+            transitionSpec = { tween(durationMillis = 500, easing = FastOutSlowInEasing) }
         ) { state -> if (state) 0.dp else if (index % 2 == 0) -200.dp else 200.dp }
     }
 
     val chatAppOffsets = chatAppText.mapIndexed { index, _ ->
         slideInAnimation.animateDp(
             label = "Chat App Letter $index",
-            transitionSpec = { tween(durationMillis = 500, easing = FastOutSlowInEasing) } // Faster animation
+            transitionSpec = { tween(durationMillis = 500, easing = FastOutSlowInEasing) }
         ) { state -> if (state) 0.dp else if (index % 2 == 0) -200.dp else 200.dp }
     }
 
@@ -134,7 +134,7 @@ fun WhiteBlockAnimation(onAnimationEnd: () -> Unit) {
 
     val transition = updateTransition(targetState = animationHeight, label = "blockAnimation")
     val animatedHeight by transition.animateDp(
-        transitionSpec = { tween(durationMillis = 2000, easing = FastOutSlowInEasing) }, // Adjusted to faster animation
+        transitionSpec = { tween(durationMillis = 2000, easing = FastOutSlowInEasing) },
         label = "HeightAnimation"
     ) { state -> state }
 

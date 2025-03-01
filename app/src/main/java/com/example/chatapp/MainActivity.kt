@@ -1,6 +1,7 @@
 package com.example.chatapp
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,32 +15,35 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.with
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.chatapp.ui.theme.ChatAppTheme
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import com.example.chatapp.roomdb.AppDatabase
+import com.example.chatapp.roomdb.User
+import com.example.chatapp.roomdb.UserDao
+import androidx.room.Room
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.O)
+    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
             WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
-
             FirebaseApp.initializeApp(this)
-
             FirebaseDatabase.getInstance().setPersistenceEnabled(true)
 
-            val navHostController = rememberNavController()
+            val db = AppDatabase.getDatabase(this)
+            val userDao = db.userDao()
 
-            AppNavigation(navHostController)
+            val navHostController = rememberNavController()
+            AppNavigation(navHostController, userDao)
         }
     }
 }
@@ -48,7 +52,7 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun AppNavigation(navHostController: NavHostController) {
+fun AppNavigation(navHostController: NavHostController, userDao: UserDao) {
     NavHost(
         navController = navHostController,
         startDestination = "WelcomeScreen"
@@ -61,9 +65,33 @@ fun AppNavigation(navHostController: NavHostController) {
                         targetOffsetX = { -it })
                 }
             ) {
-                MainChat(navHostController)
+                MainChat(navHostController, userDao)
             }
         }
         composable("WelcomeScreen") { WelcomeScreen(navHostController) }
+    }
+}
+
+
+@Database(entities = [User::class], version = 1, exportSchema = false)
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun userDao(): UserDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "app_database"
+                ).build()
+                INSTANCE = instance
+                instance
+            }
+        }
     }
 }
